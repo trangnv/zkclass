@@ -3,4 +3,4 @@ authors = ["trangnv"]
 language = "en"
 multilingual = false
 src = "src"
-title = "zku-book"
+title = "circom with zku"
