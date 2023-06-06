@@ -80,35 +80,3 @@ describe("HelloWorld", function () {
     expect(await verifier.verifyProof(a, b, c, d)).to.be.false;
   });
 });
-
-// describe("Multiplier3 with Groth16", function () {
-//   beforeEach(async function () {
-//     //[assignment] insert your script here
-//   });
-
-//   it("Circuit should multiply three numbers correctly", async function () {
-//     //[assignment] insert your script here
-//   });
-
-//   it("Should return true for correct proof", async function () {
-//     //[assignment] insert your script here
-//   });
-
-//   it("Should return false for invalid proof", async function () {
-//     //[assignment] insert your script here
-//   });
-// });
-
-// describe("Multiplier3 with PLONK", function () {
-//   beforeEach(async function () {
-//     //[assignment] insert your script here
-//   });
-
-//   it("Should return true for correct proof", async function () {
-//     //[assignment] insert your script here
-//   });
-
-//   it("Should return false for invalid proof", async function () {
-//     //[assignment] insert your script here
-//   });
-// });
