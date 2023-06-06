@@ -145,8 +145,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="week-1"><a class="header" href="#week-1">Week 1</a></h1>
-<h2 id="hello_worldcircom"><a class="header" href="#hello_worldcircom"><code>hello_world.circom</code></a></h2>
-<p>The simple circuit that checks that <code>c</code> is the multiplication of <code>a</code> and <code>b</code>.</p>
+<h2 id="1-compilation"><a class="header" href="#1-compilation">1. Compilation</a></h2>
+<p><code>HelloWorld.circom</code>: the simple circuit that checks that <code>c</code> is the multiplication of <code>a</code> and <code>b</code>.</p>
 <pre><code class="language-js">pragma circom 2.0.0;
 
 /*This circuit template checks that c is the multiplication of a and b.*/
@@ -164,15 +164,91 @@ template Multiplier2 () {
 
 component main = Multiplier2();
 </code></pre>
-<h3 id="compilation"><a class="header" href="#compilation">Compilation</a></h3>
-<h4 id="r1cs-info"><a class="header" href="#r1cs-info">R1CS info</a></h4>
-<h3 id="trusted-setup-in-groth16"><a class="header" href="#trusted-setup-in-groth16">Trusted setup in Groth16</a></h3>
-<h3 id="verification-key"><a class="header" href="#verification-key">Verification key</a></h3>
-<p>The above steps haven't done anything with proof generation.</p>
-<h2 id="multiplier3circom"><a class="header" href="#multiplier3circom"><code>Multiplier3.circom</code></a></h2>
-<p>An important restriction on circom circuits:</p>
-<pre><code class="language-js">
+<p>To compile:</p>
+<pre><code class="language-bash">cd code/week1/Q2/contracts/circuits
+mkdir HelloWorld
+circom HelloWorld.circom --r1cs --wasm --sym -o HelloWorld
 </code></pre>
+<p>That will generate</p>
+<ul>
+<li><code>HelloWorld.r1cs</code> contains the constraints of the circuit in binary format, it's like a representation of the circuit.</li>
+<li><code>HelloWorld.sym</code></li>
+<li><code>HelloWorld_js</code> dir contains Wasm code and other files needed to generate the witness.</li>
+</ul>
+<h3 id="11-r1cs-info"><a class="header" href="#11-r1cs-info">1.1. R1CS info</a></h3>
+<p>To print the R1CS info, run the following command:</p>
+<pre><code class="language-bash">snarkjs r1cs info HelloWorld/HelloWorld.r1cs
+
+[INFO]  snarkJS: Curve: bn-128
+[INFO]  snarkJS: # of Wires: 4
+[INFO]  snarkJS: # of Constraints: 1
+[INFO]  snarkJS: # of Private Inputs: 2
+[INFO]  snarkJS: # of Public Inputs: 0
+[INFO]  snarkJS: # of Labels: 4
+[INFO]  snarkJS: # of Outputs: 1
+</code></pre>
+<h2 id="2-trusted-setup-and-verification-key-generation-in-groth16"><a class="header" href="#2-trusted-setup-and-verification-key-generation-in-groth16">2. Trusted setup and verification key generation in Groth16</a></h2>
+<h3 id="phase-1-start-a-new-powers-of-tau-ceremony"><a class="header" href="#phase-1-start-a-new-powers-of-tau-ceremony">Phase 1, start a new powers of tau ceremony</a></h3>
+<pre><code>snarkjs powersoftau new bn128 14 pot14_0000.ptau -v
+</code></pre>
+<p>The parameter after <code>new</code> indicates type of curve you wish to use, in this case <code>bn128</code>. At the moment, <code>bn128</code> and <code>bls12-381</code> are supported.</p>
+<p>The parameter <code>14</code> indicates the size of the ceremony, in this case is 2^14 = 16384. The maximum value supported here is 28, which means you can use snarkjs to securely generate zk-snark parameters for circuits with up to 2 ^ 28 (≈268 million) constraints.</p>
+<p>But you dont usually generate this by yourself. There are a trusted setup ceremonies done by the community and ready to be used, you can find them for example <a href="https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_10.ptau">powersOfTau28_hez_final_10</a> or <a href="https://storage.googleapis.com/trustedsetup-a86f4.appspot.com/semaphore/semaphore_top_index.html">here</a></p>
+<h3 id="phase-2"><a class="header" href="#phase-2">Phase 2</a></h3>
+<p>Because Groth16 protocol requires <strong>circuit-specific</strong> setup, after having the <code>ptau</code> file, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file.</p>
+<p>Start new zkey</p>
+<pre><code class="language-bash">snarkjs groth16 setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_0000.zkey
+</code></pre>
+<p>Contribute to the phase 2 of the ceremony:</p>
+<pre><code class="language-bash">snarkjs zkey contribute HelloWorld/circuit_0000.zkey HelloWorld/circuit_final_g16.zkey --name=&quot;1st Contributor Name&quot;
+</code></pre>
+<p>Get a verification key in json format</p>
+<pre><code class="language-bash">snarkjs zkey export verificationkey HelloWorld/circuit_final_g16.zkey verification_key_g16.json
+</code></pre>
+<p><em>The above steps haven't done anything with proof generation.</em></p>
+<h2 id="3-some-restriction-on-circom-circuits"><a class="header" href="#3-some-restriction-on-circom-circuits">3. Some restriction on circom circuits</a></h2>
+<p>While circom allows writing the constraints that define the arithmetic circuit, all constraints must be quadratic of the form <code>A*B + C = 0</code>, where A, B and C are linear combinations of signals.</p>
+<ul>
+<li>
+<p>Linear expression: an expression where only addition is used. It can also be written using multiplication of variables by constants. E.g. <code>2*x + 3*y + 2</code> is allowed, as it is equivalent to <code>x + x + y + y + y + 2</code></p>
+</li>
+<li>
+<p>Quadratic expression: it is obtained by allowing a multiplication between two linear expressions and addition of a linear expression: A*B - C, where A, B and C are linear expressions. E.g. <code>(2*x + 3*y + 2) * (x+y) + 6\*x + y – 2</code></p>
+</li>
+<li>
+<p>As the result, <code>c &lt;== a + b</code> is not a constraint. <code>d &lt;== a * b * c</code> is not allowed.</p>
+</li>
+</ul>
+<h2 id="4-plonk-vs-groth16"><a class="header" href="#4-plonk-vs-groth16">4. PLONK vs Groth16</a></h2>
+<ul>
+<li>As oppose to Groth16, PLONK does not require <strong>circuit-specific</strong> trusted setup. Recall in Groth16, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file, we dont need that in PLONK, we can use the same <code>universal setup</code> for all circuits. This is a huge advantage of PLONK over Groth16.</li>
+</ul>
+<pre><code class="language-bash"># Generate the verification key
+snarkjs plonk setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_final_plonk.zkey
+# Get a verification key in json format
+snarkjs zkey export verificationkey HelloWorld/circuit_final_plonk.zkey verification_key_plonk.json
+</code></pre>
+<ul>
+<li>
+<p>But there is a tradeoff, <strong>Proof size</strong></p>
+</li>
+<li>
+<p>Run these commands to generate proof in Groth16 and PLONK</p>
+</li>
+</ul>
+<pre><code class="language-bash"># witness generation
+node HelloWorld/HelloWorld_js/generate_witness.js HelloWorld/HelloWorld_js/HelloWorld.wasm HelloWorld/input.json HelloWorld/witness.wtns
+
+# proof generation groth16
+snarkjs groth16 prove HelloWorld/circuit_final_g16.zkey HelloWorld/witness.wtns HelloWorld/proof_g16.json HelloWorld/public_g16.json
+
+# proof generation plonk
+snarkjs plonk prove HelloWorld/circuit_final_plonk.zkey HelloWorld/witness.wtns HelloWorld/proof_plonk.json HelloWorld/public_plonk.json
+</code></pre>
+<ul>
+<li>Comparison: Proof size of Groth16 is 803 bytes, while PLONK is 2 KB.</li>
+</ul>
+<h2 id="5-testing-circuits"><a class="header" href="#5-testing-circuits">5. Testing circuits</a></h2>
 
                     </main>
 
