@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Getting Started - circom with zku</title>
+        <title>Getting Started - zero knowledge classes</title>
 
 
         <!-- Custom HTML head -->
@@ -112,7 +112,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">circom with zku</h1>
+                    <h1 class="menu-title">zero knowledge classes</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -144,9 +144,10 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="week-1"><a class="header" href="#week-1">Week 1</a></h1>
+                        <h1 id="getting-started-with-circom"><a class="header" href="#getting-started-with-circom">Getting started with circom</a></h1>
+<p><a href="https://docs.circom.io/getting-started/installation/">Circom</a>: Circuit Compiler</p>
 <h2 id="1-compilation"><a class="header" href="#1-compilation">1. Compilation</a></h2>
-<p><code>HelloWorld.circom</code>: the simple circuit that checks that <code>c</code> is the multiplication of <code>a</code> and <code>b</code>.</p>
+<p><code>hello_world.circom</code>: the simple circuit that checks that <code>c</code> is the multiplication of <code>a</code> and <code>b</code>.</p>
 <pre><code class="language-js">pragma circom 2.0.0;
 
 /*This circuit template checks that c is the multiplication of a and b.*/
@@ -165,19 +166,18 @@ template Multiplier2 () {
 component main = Multiplier2();
 </code></pre>
 <p>To compile:</p>
-<pre><code class="language-bash">cd code/week1/Q2/contracts/circuits
-mkdir HelloWorld
-circom HelloWorld.circom --r1cs --wasm --sym -o HelloWorld
+<pre><code class="language-bash">cd code/week1/circuits
+circom hello_world.circom --r1cs --wasm --sym -o hello_world
 </code></pre>
 <p>That will generate</p>
 <ul>
-<li><code>HelloWorld.r1cs</code> contains the constraints of the circuit in binary format, it's like a representation of the circuit.</li>
-<li><code>HelloWorld.sym</code></li>
-<li><code>HelloWorld_js</code> dir contains Wasm code and other files needed to generate the witness.</li>
+<li><code>hello_world.r1cs</code> contains the constraints of the circuit in binary format, it's like a representation of the circuit.</li>
+<li><code>hello_world.sym</code></li>
+<li><code>hello_world_js</code> dir contains Wasm code and other files needed to generate the witness.</li>
 </ul>
-<h3 id="11-r1cs-info"><a class="header" href="#11-r1cs-info">1.1. R1CS info</a></h3>
+<h3 id="r1cs-info"><a class="header" href="#r1cs-info">R1CS info</a></h3>
 <p>To print the R1CS info, run the following command:</p>
-<pre><code class="language-bash">snarkjs r1cs info HelloWorld/HelloWorld.r1cs
+<pre><code class="language-bash">snarkjs r1cs info hello_world/hello_world.r1cs
 
 [INFO]  snarkJS: Curve: bn-128
 [INFO]  snarkJS: # of Wires: 4
@@ -189,23 +189,33 @@ circom HelloWorld.circom --r1cs --wasm --sym -o HelloWorld
 </code></pre>
 <h2 id="2-trusted-setup-and-verification-key-generation-in-groth16"><a class="header" href="#2-trusted-setup-and-verification-key-generation-in-groth16">2. Trusted setup and verification key generation in Groth16</a></h2>
 <h3 id="phase-1-start-a-new-powers-of-tau-ceremony"><a class="header" href="#phase-1-start-a-new-powers-of-tau-ceremony">Phase 1, start a new powers of tau ceremony</a></h3>
-<pre><code>snarkjs powersoftau new bn128 14 pot14_0000.ptau -v
+<pre><code class="language-bash">snarkjs powersoftau new bn128 14 pot14_0000.ptau -v
 </code></pre>
 <p>The parameter after <code>new</code> indicates type of curve you wish to use, in this case <code>bn128</code>. At the moment, <code>bn128</code> and <code>bls12-381</code> are supported.</p>
 <p>The parameter <code>14</code> indicates the size of the ceremony, in this case is 2^14 = 16384. The maximum value supported here is 28, which means you can use snarkjs to securely generate zk-snark parameters for circuits with up to 2 ^ 28 (≈268 million) constraints.</p>
 <p>But you dont usually generate this by yourself. There are a trusted setup ceremonies done by the community and ready to be used, you can find them for example <a href="https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_10.ptau">powersOfTau28_hez_final_10</a> or <a href="https://storage.googleapis.com/trustedsetup-a86f4.appspot.com/semaphore/semaphore_top_index.html">here</a></p>
 <h3 id="phase-2"><a class="header" href="#phase-2">Phase 2</a></h3>
 <p>Because Groth16 protocol requires <strong>circuit-specific</strong> setup, after having the <code>ptau</code> file, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file.</p>
-<p>Start new zkey</p>
-<pre><code class="language-bash">snarkjs groth16 setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_0000.zkey
+<ul>
+<li>Start new zkey</li>
+</ul>
+<pre><code class="language-bash">snarkjs groth16 setup hello_world/hello_world.r1cs powersOfTau28_hez_final_10.ptau hello_world/circuit_0000.zkey
 </code></pre>
-<p>Contribute to the phase 2 of the ceremony:</p>
-<pre><code class="language-bash">snarkjs zkey contribute HelloWorld/circuit_0000.zkey HelloWorld/circuit_final_g16.zkey --name=&quot;1st Contributor Name&quot;
+<ul>
+<li>Contribute to the phase 2 of the ceremony:</li>
+</ul>
+<pre><code class="language-bash">snarkjs zkey contribute hello_world/circuit_0000.zkey hello_world/circuit_final_g16.zkey --name=&quot;1st Contributor Name&quot;
 </code></pre>
-<p>Get a verification key in json format</p>
-<pre><code class="language-bash">snarkjs zkey export verificationkey HelloWorld/circuit_final_g16.zkey verification_key_g16.json
+<ul>
+<li>Get a verification key in json format</li>
+</ul>
+<pre><code class="language-bash">snarkjs zkey export verificationkey hello_world/circuit_final_g16.zkey hello_world/verification_key_g16.json
 </code></pre>
-<p><em>The above steps haven't done anything with proof generation.</em></p>
+<ul>
+<li>To see more information about the zkey file:</li>
+</ul>
+<pre><code class="language-bash">snarkjs zkej hello_world/circuit_final_g16.zkey hello_world/circuit_final_g16.zkey.json
+</code></pre>
 <h2 id="3-some-restriction-on-circom-circuits"><a class="header" href="#3-some-restriction-on-circom-circuits">3. Some restriction on circom circuits</a></h2>
 <p>While circom allows writing the constraints that define the arithmetic circuit, all constraints must be quadratic of the form <code>A*B + C = 0</code>, where A, B and C are linear combinations of signals.</p>
 <ul>
@@ -224,9 +234,9 @@ circom HelloWorld.circom --r1cs --wasm --sym -o HelloWorld
 <li>As oppose to Groth16, PLONK does not require <strong>circuit-specific</strong> trusted setup. Recall in Groth16, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file, we dont need that in PLONK, we can use the same <code>universal setup</code> for all circuits. This is a huge advantage of PLONK over Groth16.</li>
 </ul>
 <pre><code class="language-bash"># Generate the verification key
-snarkjs plonk setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_final_plonk.zkey
+snarkjs plonk setup hello_world/hello_world.r1cs powersOfTau28_hez_final_10.ptau hello_world/circuit_final_plonk.zkey
 # Get a verification key in json format
-snarkjs zkey export verificationkey HelloWorld/circuit_final_plonk.zkey verification_key_plonk.json
+snarkjs zkey export verificationkey hello_world/circuit_final_plonk.zkey hello_world/verification_key_plonk.json
 </code></pre>
 <ul>
 <li>
@@ -237,18 +247,77 @@ snarkjs zkey export verificationkey HelloWorld/circuit_final_plonk.zkey verifica
 </li>
 </ul>
 <pre><code class="language-bash"># witness generation
-node HelloWorld/HelloWorld_js/generate_witness.js HelloWorld/HelloWorld_js/HelloWorld.wasm HelloWorld/input.json HelloWorld/witness.wtns
+node hello_world/hello_world_js/generate_witness.js hello_world/hello_world_js/hello_world.wasm hello_world/input.json hello_world/witness.wtns
 
 # proof generation groth16
-snarkjs groth16 prove HelloWorld/circuit_final_g16.zkey HelloWorld/witness.wtns HelloWorld/proof_g16.json HelloWorld/public_g16.json
+snarkjs groth16 prove hello_world/circuit_final_g16.zkey hello_world/witness.wtns hello_world/proof_g16.json hello_world/public_g16.json
 
 # proof generation plonk
-snarkjs plonk prove HelloWorld/circuit_final_plonk.zkey HelloWorld/witness.wtns HelloWorld/proof_plonk.json HelloWorld/public_plonk.json
+snarkjs plonk prove hello_world/circuit_final_plonk.zkey hello_world/witness.wtns hello_world/proof_plonk.json hello_world/public_plonk.json
 </code></pre>
 <ul>
-<li>Comparison: Proof size of Groth16 is 803 bytes, while PLONK is 2 KB.</li>
+<li><strong>Comparison</strong>: Proof size of Groth16 is 803 bytes, while PLONK is 2 KB.</li>
 </ul>
 <h2 id="5-testing-circuits"><a class="header" href="#5-testing-circuits">5. Testing circuits</a></h2>
+<h3 id="verifying-with-snarkjs-cli"><a class="header" href="#verifying-with-snarkjs-cli">Verifying with snarkjs CLI</a></h3>
+<pre><code class="language-bash">snarkjs groth16 verify hello_world/verification_key_g16.json hello_world/public_g16.json hello_world/proof_g16.json
+[INFO]  snarkJS: OK!
+
+snarkjs plonk verify hello_world/verification_key_plonk.json hello_world/public_plonk.json hello_world/proof_plonk.json
+[INFO]  snarkJS: OK!
+</code></pre>
+<h3 id="verifying-with-smart-contract"><a class="header" href="#verifying-with-smart-contract">Verifying with smart contract</a></h3>
+<p>The verifier can be a smart contract, so we can use existing framework to test the circuits.</p>
+<p>To export the verifier smart contract:</p>
+<pre><code class="language-bash"># groth16
+snarkjs zkey export solidityverifier hello_world/circuit_final_g16.zkey ../verifier_contracts/contracts/hello_world_g16.sol
+</code></pre>
+<p>Now move to <code>verifier_contracts</code> dir and run some unit tests for our verifier/circuits:</p>
+<pre><code class="language-bash">cd ../verifier_contracts
+npm install
+npx hardhat test
+</code></pre>
+<h3 id="running-time-of-unit-tests"><a class="header" href="#running-time-of-unit-tests">Running time of unit tests</a></h3>
+<h2 id="6-circom-library"><a class="header" href="#6-circom-library">6. Circom library</a></h2>
+<h3 id="lessthan"><a class="header" href="#lessthan">LessThan</a></h3>
+<pre><code class="language-js">pragma circom 2.0.0;
+include &quot;bitify.circom&quot;;
+
+template LessThan(n) {
+    assert(n &lt;= 252);
+    signal input in[2];
+    signal output out;
+
+    component n2b = Num2Bits(n+1);
+
+    n2b.in &lt;== in[0]+ (1&lt;&lt;n) - in[1];
+
+    out &lt;== 1-n2b.out[n];
+}
+</code></pre>
+<p>Try to walk through the circuit and understand how it works, with <code>n = 32, in[0] = 2, and in[1] = 3</code></p>
+<ul>
+<li>
+<p>The <code>assert(n &lt;= 252)</code> condition is satisfied because n = 32 &lt; 252</p>
+</li>
+<li>
+<p><code>in[0] + (1&lt;&lt;n) - in[1] = 2 + (1&lt;&lt;32) - 3</code> = <code>(2 + 4294967296 - 3)</code> = <code>4294967295</code></p>
+<ul>
+<li><code>1&lt;&lt;n</code>: represents a bitwise left shift operation, where 1 is shifted n positions to the left. E.g. 1 &lt;&lt; 3 = 1000 in binary</li>
+</ul>
+</li>
+<li>
+<p><code>component n2b = Num2Bits(33)</code></p>
+<ul>
+<li>n2b.in = 4294967295</li>
+<li>n2b.out is the 33 bits binary representation of 429496729</li>
+</ul>
+</li>
+<li>
+<p><code>out &lt;== 1-n2b.out[n];</code> output of the circuit is the last bit of n2b.out, which is 0 if in[0] &lt; in[1], otherwise 1.</p>
+</li>
+</ul>
+<h3 id="circomlib-matrix-with-puzzle"><a class="header" href="#circomlib-matrix-with-puzzle"><a href="https://github.com/socathie/circomlib-matrix">circomlib-matrix</a> with puzzle</a></h3>
 
                     </main>
 
