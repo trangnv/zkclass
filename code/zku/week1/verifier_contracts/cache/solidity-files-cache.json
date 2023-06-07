@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/nvtrang/code/prj/learn-circom/zku/code/week1/verifier_contracts/contracts/hello_world_g16.sol": {
+      "lastModificationDate": 1686022772450,
+      "contentHash": "e47d9a50dc7ff884a6932c20de7743c6",
+      "sourceName": "contracts/hello_world_g16.sol",
+      "solcConfig": {
+        "version": "0.8.18",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "HelloWorldVerifier",
+        "Pairing"
+      ]
+    }
+  }
+}

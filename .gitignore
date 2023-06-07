@@ -1,1 +1,11 @@
+# dirs
 book
+code/week1/circuits/hello_world
+node_modules
+
+# ptau files
+*.ptau
+code/week1/verifier_contracts/cache
+code/week1/verifier_contracts/artifacts
+
+TODO.MD
