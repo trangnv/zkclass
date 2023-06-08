@@ -149,6 +149,8 @@
 <p>Learning zkp with contents base on:</p>
 <ul>
 <li><a href="https://zku.gnomio.com/course/view.php?id=8">Zero-Knowledge University</a></li>
+<li><a href="https://github.com/maxgillett/giza">Giza - A Cairo VM prover implemented using Winterfell</a></li>
+<li><a href="https://learn.0xparc.org/">learn.0xparc</a></li>
 </ul>
 <p>Source code, including this book, is available at <a href="https://github.com/trangnv/zkclass">github.com/trangnv/zkclass</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-with-circom"><a class="header" href="#getting-started-with-circom">Getting started with circom</a></h1>
@@ -391,6 +393,9 @@ template LessThan(n) {
 <p>An example: tree with depth = 3, for leaf H(E), <code>pathIndices</code> is [0,0,1] and <code>siblings</code> is [H(F), H(GH), H(ABCD)]</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hash-functions-benchmarking"><a class="header" href="#hash-functions-benchmarking">Hash functions benchmarking</a></h1>
 <p><em>Some hash functions are more SNARK friendly than others, but</em></p>
+<ul>
+<li><a href="https://github.com/trangnv/zkclass/tree/main/code/zku/week2/circuits">Implementations</a> of hash functions written in circom, including: keccak, mimc, pedersen, poseidon, sha256.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="stark"><a class="header" href="#stark">STARK</a></h1>
 <p>Two of the most compelling zero-knowledge technologies in the market today are zk-STARKs and zk-SNARKs. What are the differences between them? The T and the N, <code>Scalable Transparent</code> and <code>Succinct Non-interactive</code>, respectively.</p>
 <p>STARK is mostly utilized by STARKWARE, for app specific rollups STARKEx and recently for StarkNet, a permissionless STARK-based L2 platform.</p>
