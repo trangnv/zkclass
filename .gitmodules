@@ -1,0 +1,3 @@
+[submodule "code/stark/giza"]
+	path = code/stark/giza
+	url = https://github.com/maxgillett/giza
