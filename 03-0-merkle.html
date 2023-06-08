@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found - zero knowledge classes</title>
-        <base href="/">
+        <title>Merkle for Privacy - zero knowledge classes</title>
 
 
         <!-- Custom HTML head -->
@@ -84,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02-0-start.html"><strong aria-hidden="true">2.</strong> Getting Started with Circom</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="02-1-circomlib.html"><strong aria-hidden="true">2.1.</strong> Circom libraries</a></li></ol></li><li class="chapter-item expanded "><a href="03-0-merkle.html"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="03-1-hash.html"><strong aria-hidden="true">3.1.</strong> Hash functions benchmarking</a></li></ol></li><li class="chapter-item expanded "><a href="04-0-stark.html"><strong aria-hidden="true">4.</strong> STARK</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02-0-start.html"><strong aria-hidden="true">2.</strong> Getting Started with Circom</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="02-1-circomlib.html"><strong aria-hidden="true">2.1.</strong> Circom libraries</a></li></ol></li><li class="chapter-item expanded "><a href="03-0-merkle.html" class="active"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="03-1-hash.html"><strong aria-hidden="true">3.1.</strong> Hash functions benchmarking</a></li></ol></li><li class="chapter-item expanded "><a href="04-0-stark.html"><strong aria-hidden="true">4.</strong> STARK</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -145,14 +144,80 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
+                        <h1 id="merkle-for-privacy"><a class="header" href="#merkle-for-privacy">Merkle for Privacy</a></h1>
+<p><em>prove that you are a member of a group without revealing your identity</em></p>
+<p><a href="">The circuit</a> uses Merkle Proof as Proof of Membership. Each group is represented by a Merkle root. A member of the group can prove that he is a member of the group by providing a Merkle Proof. I.e. he knows the leaf, the pathIndices and the siblings that lead to the <em>public</em> Merkle root, without revealing the leaf.</p>
+<pre><code class="language-js">template MerkleTreeInclusionProof(nLevels) {
+    signal input leaf;
+    signal input pathIndices[nLevels];
+    signal input siblings[nLevels];
+
+    signal input root;
+
+    component poseidons[nLevels];
+    component mux[nLevels];
+
+    signal hashes[nLevels + 1];
+    hashes[0] &lt;== leaf;
+
+    for (var i = 0; i &lt; nLevels; i++) {
+        pathIndices[i] * (1 - pathIndices[i]) === 0;
+
+        poseidons[i] = Poseidon(2);
+        mux[i] = MultiMux1(2);
+
+        mux[i].c[0][0] &lt;== hashes[i];
+        mux[i].c[0][1] &lt;== siblings[i];
+
+        mux[i].c[1][0] &lt;== siblings[i];
+        mux[i].c[1][1] &lt;== hashes[i];
+
+        mux[i].s &lt;== pathIndices[i];
+
+        poseidons[i].inputs[0] &lt;== mux[i].out[0];
+        poseidons[i].inputs[1] &lt;== mux[i].out[1];
+
+        hashes[i + 1] &lt;== poseidons[i].out;
+    }
+
+    root === hashes[nLevels];
+}
+</code></pre>
+<h2 id="merkle-trees"><a class="header" href="#merkle-trees">Merkle Trees</a></h2>
+<ul>
+<li>
+<p>Hash function is Poseidon which is included in circomlib</p>
+</li>
+<li>
+<p><code>nLevels</code> is the number of levels in the tree, or the depth of the tree. The number of <code>leaves = 2^nLevels</code></p>
+</li>
+<li>
+<p><code>leaf</code> is the hash of the original data</p>
+</li>
+<li>
+<p><code>pathIndices</code> is the position of the leaf in the tree, an array with <code>nLevels</code> length, each element is either 0 or 1</p>
+</li>
+<li>
+<p><code>siblings</code> is the hashes of the nodes on the path from the leaf to the root. The number of <code>siblings</code> = <code>nLevels</code></p>
+</li>
+<li>
+<p>Given the <code>leaf</code>, the <code>pathIndices</code> and the <code>siblings</code>, the circuit whould be able to compute the root</p>
+</li>
+</ul>
+<p><img src="images/merkle_tree1.png" alt="Merkle tree" title="Merkle tree" /></p>
+<p>An example: tree with depth = 3, for leaf H(E), <code>pathIndices</code> is [0,0,1] and <code>siblings</code> is [H(F), H(GH), H(ABCD)]</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="02-1-circomlib.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
+                            <a rel="next" href="03-1-hash.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -160,7 +225,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="02-1-circomlib.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
+                    <a rel="next" href="03-1-hash.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

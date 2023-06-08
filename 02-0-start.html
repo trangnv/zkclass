@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Getting Started - zero knowledge classes</title>
+        <title>Getting Started with Circom - zero knowledge classes</title>
 
 
         <!-- Custom HTML head -->
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="00.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="w1-intro.html" class="active"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="w2-merkle.html"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02-0-start.html" class="active"><strong aria-hidden="true">2.</strong> Getting Started with Circom</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="02-1-circomlib.html"><strong aria-hidden="true">2.1.</strong> Circom libraries</a></li></ol></li><li class="chapter-item expanded "><a href="03-0-merkle.html"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="03-1-hash.html"><strong aria-hidden="true">3.1.</strong> Hash functions benchmarking</a></li></ol></li><li class="chapter-item expanded "><a href="04-0-stark.html"><strong aria-hidden="true">4.</strong> STARK</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -246,6 +246,7 @@ snarkjs zkey export verificationkey hello_world/circuit_final_plonk.zkey hello_w
 <p>Run these commands to generate proof in Groth16 and PLONK</p>
 </li>
 </ul>
+<p>With input <code>input.json</code>: { &quot;a&quot;: 22, &quot;b&quot;: 33 }</p>
 <pre><code class="language-bash"># witness generation
 node hello_world/hello_world_js/generate_witness.js hello_world/hello_world_js/hello_world.wasm hello_world/input.json hello_world/witness.wtns
 
@@ -278,56 +279,16 @@ npm install
 npx hardhat test
 </code></pre>
 <h3 id="running-time-of-unit-tests"><a class="header" href="#running-time-of-unit-tests">Running time of unit tests</a></h3>
-<h2 id="6-circom-library"><a class="header" href="#6-circom-library">6. Circom library</a></h2>
-<h3 id="lessthan"><a class="header" href="#lessthan">LessThan</a></h3>
-<pre><code class="language-js">pragma circom 2.0.0;
-include &quot;bitify.circom&quot;;
-
-template LessThan(n) {
-    assert(n &lt;= 252);
-    signal input in[2];
-    signal output out;
-
-    component n2b = Num2Bits(n+1);
-
-    n2b.in &lt;== in[0]+ (1&lt;&lt;n) - in[1];
-
-    out &lt;== 1-n2b.out[n];
-}
-</code></pre>
-<p>Try to walk through the circuit and understand how it works, with <code>n = 32, in[0] = 2, and in[1] = 3</code></p>
-<ul>
-<li>
-<p>The <code>assert(n &lt;= 252)</code> condition is satisfied because n = 32 &lt; 252</p>
-</li>
-<li>
-<p><code>in[0] + (1&lt;&lt;n) - in[1] = 2 + (1&lt;&lt;32) - 3</code> = <code>(2 + 4294967296 - 3)</code> = <code>4294967295</code></p>
-<ul>
-<li><code>1&lt;&lt;n</code>: represents a bitwise left shift operation, where 1 is shifted n positions to the left. E.g. 1 &lt;&lt; 3 = 1000 in binary</li>
-</ul>
-</li>
-<li>
-<p><code>component n2b = Num2Bits(33)</code></p>
-<ul>
-<li>n2b.in = 4294967295</li>
-<li>n2b.out is the 33 bits binary representation of 429496729</li>
-</ul>
-</li>
-<li>
-<p><code>out &lt;== 1-n2b.out[n];</code> output of the circuit is the last bit of n2b.out, which is 0 if in[0] &lt; in[1], otherwise 1.</p>
-</li>
-</ul>
-<h3 id="circomlib-matrix-with-puzzle"><a class="header" href="#circomlib-matrix-with-puzzle"><a href="https://github.com/socathie/circomlib-matrix">circomlib-matrix</a> with puzzle</a></h3>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="00.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="01.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="w2-merkle.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="02-1-circomlib.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -337,11 +298,11 @@ template LessThan(n) {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="00.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="01.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="w2-merkle.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="02-1-circomlib.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

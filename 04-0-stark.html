@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>zero knowledge classes</title>
-        <meta name="robots" content="noindex" />
+        <title>STARK - zero knowledge classes</title>
 
 
         <!-- Custom HTML head -->
@@ -84,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02-0-start.html"><strong aria-hidden="true">2.</strong> Getting Started with Circom</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="02-1-circomlib.html"><strong aria-hidden="true">2.1.</strong> Circom libraries</a></li></ol></li><li class="chapter-item expanded "><a href="03-0-merkle.html"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="03-1-hash.html"><strong aria-hidden="true">3.1.</strong> Hash functions benchmarking</a></li></ol></li><li class="chapter-item expanded "><a href="04-0-stark.html"><strong aria-hidden="true">4.</strong> STARK</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02-0-start.html"><strong aria-hidden="true">2.</strong> Getting Started with Circom</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="02-1-circomlib.html"><strong aria-hidden="true">2.1.</strong> Circom libraries</a></li></ol></li><li class="chapter-item expanded "><a href="03-0-merkle.html"><strong aria-hidden="true">3.</strong> Merkle for Privacy</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="03-1-hash.html"><strong aria-hidden="true">3.1.</strong> Hash functions benchmarking</a></li></ol></li><li class="chapter-item expanded "><a href="04-0-stark.html" class="active"><strong aria-hidden="true">4.</strong> STARK</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -145,253 +144,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Learning zkp with contents base on:</p>
-<ul>
-<li><a href="https://zku.gnomio.com/course/view.php?id=8">Zero-Knowledge University</a></li>
-</ul>
-<p>Source code, including this book, is available at <a href="https://github.com/trangnv/zkclass">github.com/trangnv/zkclass</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-with-circom"><a class="header" href="#getting-started-with-circom">Getting started with circom</a></h1>
-<p><a href="https://docs.circom.io/getting-started/installation/">Circom</a>: Circuit Compiler</p>
-<h2 id="1-compilation"><a class="header" href="#1-compilation">1. Compilation</a></h2>
-<p><code>hello_world.circom</code>: the simple circuit that checks that <code>c</code> is the multiplication of <code>a</code> and <code>b</code>.</p>
-<pre><code class="language-js">pragma circom 2.0.0;
-
-/*This circuit template checks that c is the multiplication of a and b.*/
-
-template Multiplier2 () {
-
-   // Declaration of signals.
-   signal input a;
-   signal input b;
-   signal output c;
-
-   // Constraints.
-   c &lt;== a * b;
-}
-
-component main = Multiplier2();
-</code></pre>
-<p>To compile:</p>
-<pre><code class="language-bash">cd code/week1/circuits
-circom hello_world.circom --r1cs --wasm --sym -o hello_world
-</code></pre>
-<p>That will generate</p>
-<ul>
-<li><code>hello_world.r1cs</code> contains the constraints of the circuit in binary format, it's like a representation of the circuit.</li>
-<li><code>hello_world.sym</code></li>
-<li><code>hello_world_js</code> dir contains Wasm code and other files needed to generate the witness.</li>
-</ul>
-<h3 id="r1cs-info"><a class="header" href="#r1cs-info">R1CS info</a></h3>
-<p>To print the R1CS info, run the following command:</p>
-<pre><code class="language-bash">snarkjs r1cs info hello_world/hello_world.r1cs
-
-[INFO]  snarkJS: Curve: bn-128
-[INFO]  snarkJS: # of Wires: 4
-[INFO]  snarkJS: # of Constraints: 1
-[INFO]  snarkJS: # of Private Inputs: 2
-[INFO]  snarkJS: # of Public Inputs: 0
-[INFO]  snarkJS: # of Labels: 4
-[INFO]  snarkJS: # of Outputs: 1
-</code></pre>
-<h2 id="2-trusted-setup-and-verification-key-generation-in-groth16"><a class="header" href="#2-trusted-setup-and-verification-key-generation-in-groth16">2. Trusted setup and verification key generation in Groth16</a></h2>
-<h3 id="phase-1-start-a-new-powers-of-tau-ceremony"><a class="header" href="#phase-1-start-a-new-powers-of-tau-ceremony">Phase 1, start a new powers of tau ceremony</a></h3>
-<pre><code class="language-bash">snarkjs powersoftau new bn128 14 pot14_0000.ptau -v
-</code></pre>
-<p>The parameter after <code>new</code> indicates type of curve you wish to use, in this case <code>bn128</code>. At the moment, <code>bn128</code> and <code>bls12-381</code> are supported.</p>
-<p>The parameter <code>14</code> indicates the size of the ceremony, in this case is 2^14 = 16384. The maximum value supported here is 28, which means you can use snarkjs to securely generate zk-snark parameters for circuits with up to 2 ^ 28 (≈268 million) constraints.</p>
-<p>But you dont usually generate this by yourself. There are a trusted setup ceremonies done by the community and ready to be used, you can find them for example <a href="https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_10.ptau">powersOfTau28_hez_final_10</a> or <a href="https://storage.googleapis.com/trustedsetup-a86f4.appspot.com/semaphore/semaphore_top_index.html">here</a></p>
-<h3 id="phase-2"><a class="header" href="#phase-2">Phase 2</a></h3>
-<p>Because Groth16 protocol requires <strong>circuit-specific</strong> setup, after having the <code>ptau</code> file, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file.</p>
-<ul>
-<li>Start new zkey</li>
-</ul>
-<pre><code class="language-bash">snarkjs groth16 setup hello_world/hello_world.r1cs powersOfTau28_hez_final_10.ptau hello_world/circuit_0000.zkey
-</code></pre>
-<ul>
-<li>Contribute to the phase 2 of the ceremony:</li>
-</ul>
-<pre><code class="language-bash">snarkjs zkey contribute hello_world/circuit_0000.zkey hello_world/circuit_final_g16.zkey --name=&quot;1st Contributor Name&quot;
-</code></pre>
-<ul>
-<li>Get a verification key in json format</li>
-</ul>
-<pre><code class="language-bash">snarkjs zkey export verificationkey hello_world/circuit_final_g16.zkey hello_world/verification_key_g16.json
-</code></pre>
-<ul>
-<li>To see more information about the zkey file:</li>
-</ul>
-<pre><code class="language-bash">snarkjs zkej hello_world/circuit_final_g16.zkey hello_world/circuit_final_g16.zkey.json
-</code></pre>
-<h2 id="3-some-restriction-on-circom-circuits"><a class="header" href="#3-some-restriction-on-circom-circuits">3. Some restriction on circom circuits</a></h2>
-<p>While circom allows writing the constraints that define the arithmetic circuit, all constraints must be quadratic of the form <code>A*B + C = 0</code>, where A, B and C are linear combinations of signals.</p>
-<ul>
-<li>
-<p>Linear expression: an expression where only addition is used. It can also be written using multiplication of variables by constants. E.g. <code>2*x + 3*y + 2</code> is allowed, as it is equivalent to <code>x + x + y + y + y + 2</code></p>
-</li>
-<li>
-<p>Quadratic expression: it is obtained by allowing a multiplication between two linear expressions and addition of a linear expression: A*B - C, where A, B and C are linear expressions. E.g. <code>(2*x + 3*y + 2) * (x+y) + 6\*x + y – 2</code></p>
-</li>
-<li>
-<p>As the result, <code>c &lt;== a + b</code> is not a constraint. <code>d &lt;== a * b * c</code> is not allowed.</p>
-</li>
-</ul>
-<h2 id="4-plonk-vs-groth16"><a class="header" href="#4-plonk-vs-groth16">4. PLONK vs Groth16</a></h2>
-<ul>
-<li>As oppose to Groth16, PLONK does not require <strong>circuit-specific</strong> trusted setup. Recall in Groth16, we need to run the phase 2 of the ceremony to generate the <code>final zkey</code> file, we dont need that in PLONK, we can use the same <code>universal setup</code> for all circuits. This is a huge advantage of PLONK over Groth16.</li>
-</ul>
-<pre><code class="language-bash"># Generate the verification key
-snarkjs plonk setup hello_world/hello_world.r1cs powersOfTau28_hez_final_10.ptau hello_world/circuit_final_plonk.zkey
-# Get a verification key in json format
-snarkjs zkey export verificationkey hello_world/circuit_final_plonk.zkey hello_world/verification_key_plonk.json
-</code></pre>
-<ul>
-<li>
-<p>But there is a tradeoff, <strong>Proof size</strong></p>
-</li>
-<li>
-<p>Run these commands to generate proof in Groth16 and PLONK</p>
-</li>
-</ul>
-<p>With input <code>input.json</code>: { &quot;a&quot;: 22, &quot;b&quot;: 33 }</p>
-<pre><code class="language-bash"># witness generation
-node hello_world/hello_world_js/generate_witness.js hello_world/hello_world_js/hello_world.wasm hello_world/input.json hello_world/witness.wtns
-
-# proof generation groth16
-snarkjs groth16 prove hello_world/circuit_final_g16.zkey hello_world/witness.wtns hello_world/proof_g16.json hello_world/public_g16.json
-
-# proof generation plonk
-snarkjs plonk prove hello_world/circuit_final_plonk.zkey hello_world/witness.wtns hello_world/proof_plonk.json hello_world/public_plonk.json
-</code></pre>
-<ul>
-<li><strong>Comparison</strong>: Proof size of Groth16 is 803 bytes, while PLONK is 2 KB.</li>
-</ul>
-<h2 id="5-testing-circuits"><a class="header" href="#5-testing-circuits">5. Testing circuits</a></h2>
-<h3 id="verifying-with-snarkjs-cli"><a class="header" href="#verifying-with-snarkjs-cli">Verifying with snarkjs CLI</a></h3>
-<pre><code class="language-bash">snarkjs groth16 verify hello_world/verification_key_g16.json hello_world/public_g16.json hello_world/proof_g16.json
-[INFO]  snarkJS: OK!
-
-snarkjs plonk verify hello_world/verification_key_plonk.json hello_world/public_plonk.json hello_world/proof_plonk.json
-[INFO]  snarkJS: OK!
-</code></pre>
-<h3 id="verifying-with-smart-contract"><a class="header" href="#verifying-with-smart-contract">Verifying with smart contract</a></h3>
-<p>The verifier can be a smart contract, so we can use existing framework to test the circuits.</p>
-<p>To export the verifier smart contract:</p>
-<pre><code class="language-bash"># groth16
-snarkjs zkey export solidityverifier hello_world/circuit_final_g16.zkey ../verifier_contracts/contracts/hello_world_g16.sol
-</code></pre>
-<p>Now move to <code>verifier_contracts</code> dir and run some unit tests for our verifier/circuits:</p>
-<pre><code class="language-bash">cd ../verifier_contracts
-npm install
-npx hardhat test
-</code></pre>
-<h3 id="running-time-of-unit-tests"><a class="header" href="#running-time-of-unit-tests">Running time of unit tests</a></h3>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="circom-libraries"><a class="header" href="#circom-libraries">Circom libraries</a></h1>
-<h2 id="circomlib"><a class="header" href="#circomlib">Circomlib</a></h2>
-<h3 id="lessthan"><a class="header" href="#lessthan">LessThan</a></h3>
-<pre><code class="language-js">pragma circom 2.0.0;
-include &quot;bitify.circom&quot;;
-
-template LessThan(n) {
-    assert(n &lt;= 252);
-    signal input in[2];
-    signal output out;
-
-    component n2b = Num2Bits(n+1);
-
-    n2b.in &lt;== in[0]+ (1&lt;&lt;n) - in[1];
-
-    out &lt;== 1-n2b.out[n];
-}
-</code></pre>
-<p>Walk through the circuit and understand how it works, with <code>n = 32, in[0] = 2, and in[1] = 3</code></p>
-<ul>
-<li>
-<p>The <code>assert(n &lt;= 252)</code> condition is satisfied because n = 32 &lt; 252</p>
-</li>
-<li>
-<p><code>in[0] + (1&lt;&lt;n) - in[1] = 2 + (1&lt;&lt;32) - 3</code> = <code>(2 + 4294967296 - 3)</code> = <code>4294967295</code></p>
-<ul>
-<li><code>1&lt;&lt;n</code>: represents a bitwise left shift operation, where 1 is shifted n positions to the left. E.g. 1 &lt;&lt; 3 = 1000 in binary</li>
-</ul>
-</li>
-<li>
-<p><code>component n2b = Num2Bits(33)</code></p>
-<ul>
-<li>n2b.in = 4294967295</li>
-<li>n2b.out is the 33 bits binary representation of 429496729</li>
-</ul>
-</li>
-<li>
-<p><code>out &lt;== 1-n2b.out[n];</code> output of the circuit is the last bit of n2b.out, which is 0 if in[0] &lt; in[1], otherwise 1.</p>
-</li>
-</ul>
-<h2 id="circomlib-matrix-with-puzzle"><a class="header" href="#circomlib-matrix-with-puzzle"><a href="https://github.com/socathie/circomlib-matrix">circomlib-matrix</a> with puzzle</a></h2>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="merkle-for-privacy"><a class="header" href="#merkle-for-privacy">Merkle for Privacy</a></h1>
-<p><em>prove that you are a member of a group without revealing your identity</em></p>
-<p><a href="">The circuit</a> uses Merkle Proof as Proof of Membership. Each group is represented by a Merkle root. A member of the group can prove that he is a member of the group by providing a Merkle Proof. I.e. he knows the leaf, the pathIndices and the siblings that lead to the <em>public</em> Merkle root, without revealing the leaf.</p>
-<pre><code class="language-js">template MerkleTreeInclusionProof(nLevels) {
-    signal input leaf;
-    signal input pathIndices[nLevels];
-    signal input siblings[nLevels];
-
-    signal input root;
-
-    component poseidons[nLevels];
-    component mux[nLevels];
-
-    signal hashes[nLevels + 1];
-    hashes[0] &lt;== leaf;
-
-    for (var i = 0; i &lt; nLevels; i++) {
-        pathIndices[i] * (1 - pathIndices[i]) === 0;
-
-        poseidons[i] = Poseidon(2);
-        mux[i] = MultiMux1(2);
-
-        mux[i].c[0][0] &lt;== hashes[i];
-        mux[i].c[0][1] &lt;== siblings[i];
-
-        mux[i].c[1][0] &lt;== siblings[i];
-        mux[i].c[1][1] &lt;== hashes[i];
-
-        mux[i].s &lt;== pathIndices[i];
-
-        poseidons[i].inputs[0] &lt;== mux[i].out[0];
-        poseidons[i].inputs[1] &lt;== mux[i].out[1];
-
-        hashes[i + 1] &lt;== poseidons[i].out;
-    }
-
-    root === hashes[nLevels];
-}
-</code></pre>
-<h2 id="merkle-trees"><a class="header" href="#merkle-trees">Merkle Trees</a></h2>
-<ul>
-<li>
-<p>Hash function is Poseidon which is included in circomlib</p>
-</li>
-<li>
-<p><code>nLevels</code> is the number of levels in the tree, or the depth of the tree. The number of <code>leaves = 2^nLevels</code></p>
-</li>
-<li>
-<p><code>leaf</code> is the hash of the original data</p>
-</li>
-<li>
-<p><code>pathIndices</code> is the position of the leaf in the tree, an array with <code>nLevels</code> length, each element is either 0 or 1</p>
-</li>
-<li>
-<p><code>siblings</code> is the hashes of the nodes on the path from the leaf to the root. The number of <code>siblings</code> = <code>nLevels</code></p>
-</li>
-<li>
-<p>Given the <code>leaf</code>, the <code>pathIndices</code> and the <code>siblings</code>, the circuit whould be able to compute the root</p>
-</li>
-</ul>
-<p><img src="images/merkle_tree1.png" alt="Merkle tree" title="Merkle tree" /></p>
-<p>An example: tree with depth = 3, for leaf H(E), <code>pathIndices</code> is [0,0,1] and <code>siblings</code> is [H(F), H(GH), H(ABCD)]</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="hash-functions-benchmarking"><a class="header" href="#hash-functions-benchmarking">Hash functions benchmarking</a></h1>
-<p><em>Some hash functions are more SNARK friendly than others, but</em></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="stark"><a class="header" href="#stark">STARK</a></h1>
+                        <h1 id="stark"><a class="header" href="#stark">STARK</a></h1>
 <p>Two of the most compelling zero-knowledge technologies in the market today are zk-STARKs and zk-SNARKs. What are the differences between them? The T and the N, <code>Scalable Transparent</code> and <code>Succinct Non-interactive</code>, respectively.</p>
 <p>STARK is mostly utilized by STARKWARE, for app specific rollups STARKEx and recently for StarkNet, a permissionless STARK-based L2 platform.</p>
 <p>The importance tradeoffs between STARKs and SNARKs is: STARKs do not require a trusted setup, but the proof size is much larger than SNARKs.</p>
@@ -529,6 +282,9 @@ Execution verified
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="03-1-hash.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
 
                         <div style="clear: both"></div>
@@ -537,6 +293,9 @@ Execution verified
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="03-1-hash.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
             </nav>
 
@@ -560,11 +319,6 @@ Execution verified
 
         <!-- Custom JS scripts -->
 
-        <script>
-        window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
-        });
-        </script>
 
     </div>
     </body>
