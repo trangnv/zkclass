@@ -396,7 +396,10 @@ template LessThan(n) {
 <ul>
 <li><a href="https://github.com/trangnv/zkclass/tree/main/code/zku/week2/circuits">Implementations</a> of hash functions written in circom, including: keccak, mimc, pedersen, poseidon, sha256.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="stark"><a class="header" href="#stark">STARK</a></h1>
+<div class="table-wrapper"><table><thead><tr><th></th><th>keccak</th><th>sha256</th><th>pedersen</th><th>mimc</th><th>poseidon</th></tr></thead><tbody>
+<tr><td># of constraints</td><td>151357</td><td>29891</td><td>964</td><td>660</td><td>213</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="stark"><a class="header" href="#stark">STARK</a></h1>
 <p>Two of the most compelling zero-knowledge technologies in the market today are zk-STARKs and zk-SNARKs. What are the differences between them? The T and the N, <code>Scalable Transparent</code> and <code>Succinct Non-interactive</code>, respectively.</p>
 <p>STARK is mostly utilized by STARKWARE, for app specific rollups STARKEx and recently for StarkNet, a permissionless STARK-based L2 platform.</p>
 <p>The importance tradeoffs between STARKs and SNARKs is: STARKs do not require a trusted setup, but the proof size is much larger than SNARKs.</p>
