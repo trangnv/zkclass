@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
-include "../node_modules/circomlib/circuits/mimcsponge.circom"
+include "node_modules/circomlib/circuits/mimcsponge.circom";
 
 template MiMCBench(){
     signal input PreImage;
@@ -9,4 +9,4 @@ template MiMCBench(){
     mimcSecret.k <== 0;
     out <== mimcSecret.outs[0];
 }
-component main {public[PreImage]} = Sha256Bench();
+component main {public[PreImage]} = MiMCBench();
